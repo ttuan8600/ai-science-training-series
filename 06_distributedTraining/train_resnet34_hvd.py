@@ -39,7 +39,9 @@ num_parallel_readers = parallel_threads
 gpus = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'GPU')
 
-
+for gpu in gpus:
+		tf.config.experimental.set_memory_growth(gpu, True)
+    
 #########################################################################
 # Here's the Residual layer from the first half again:
 #########################################################################
@@ -275,7 +277,7 @@ def train_epoch(i_epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BA
 
         # Peform the training step for this batch
         loss, acc = training_step(network, optimizer, train_images, train_labels)
-        HVD - 8 average the metrics 
+        # HVD - 8 average the metrics 
         total_loss = hvd.allreduce(loss, average=True)
         total_acc = hvd.allreduce(acc, average=True)
         loss = total_loss
